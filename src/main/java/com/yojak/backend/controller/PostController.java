@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import java.util.UUID;
 
 import java.util.List;
 
@@ -47,7 +48,10 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PostResponse>> getPosts(@RequestParam(required = false) String status) {
-        return ResponseEntity.ok(postService.getPosts(status));
+    public ResponseEntity<List<PostResponse>> getPosts(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false, defaultValue = "recent") String sortBy) {
+        return ResponseEntity.ok(postService.getPosts(status, sortBy));
     }
+
 }

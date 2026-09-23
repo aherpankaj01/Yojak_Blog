@@ -10,16 +10,11 @@ import java.util.UUID;
 @Getter
 @Setter
 @AllArgsConstructor
-public class PostResponse {
+public class CommentResponse {
 
-    private String slug;
-    private String title;
+    private UUID id;
     private String content;
-    private String featuredImage;
-    private String status;
     private UUID userId;
+    private String userName;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private long likeCount;
-    private long commentCount;
 }

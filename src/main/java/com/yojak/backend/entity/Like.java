@@ -10,33 +10,27 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "users")
+@Table(name = "likes")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class Like {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false)
-    private String name;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_slug", nullable = false)
+    private Post post;
 
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    @Column(nullable = false)
-    private String password;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-
-    @Column(columnDefinition = "TEXT")
-    private String bio;
-
-    private String avatar; // stores the Cloudinary fileId, same pattern as post.featuredImage
 
     @PrePersist
     protected void onCreate() {

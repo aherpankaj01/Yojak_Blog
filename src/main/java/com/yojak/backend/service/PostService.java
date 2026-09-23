@@ -4,11 +4,13 @@ import com.yojak.backend.dto.PostRequest;
 import com.yojak.backend.dto.PostResponse;
 import com.yojak.backend.entity.Post;
 import com.yojak.backend.entity.User;
+import com.yojak.backend.repository.CommentRepository;
+import com.yojak.backend.repository.LikeRepository;
 import com.yojak.backend.repository.PostRepository;
 import com.yojak.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
+import java.util.UUID;
 import java.util.List;
 
 @Service
@@ -17,6 +19,8 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final LikeRepository likeRepository;
+    private final CommentRepository commentRepository;
 
     public PostResponse createPost(PostRequest request, String userEmail) {
         User user = userRepository.findByEmail(userEmail)
@@ -48,8 +52,6 @@ public class PostService {
         post.setContent(request.getContent());
         post.setFeaturedImage(request.getFeaturedImage());
         post.setStatus(request.getStatus());
-        // slug itself is intentionally NOT updated here — it's the primary key.
-        // Renaming a slug would require a delete+recreate, not a field update.
 
         Post saved = postRepository.save(post);
         return toResponse(saved);
@@ -70,15 +72,21 @@ public class PostService {
         return toResponse(post);
     }
 
-    public List<PostResponse> getPosts(String status) {
-        List<Post> posts = (status != null)
-                ? postRepository.findByStatus(status)
-                : postRepository.findAll();
+    public List<PostResponse> getPosts(String status, String sortBy) {
+        List<Post> posts;
+
+        if (status == null) {
+            posts = postRepository.findAll();
+        } else if ("most_liked".equals(sortBy)) {
+            posts = postRepository.findByStatusOrderByLikeCountDesc(status);
+        } else if ("most_commented".equals(sortBy)) {
+            posts = postRepository.findByStatusOrderByCommentCountDesc(status);
+        } else {
+            posts = postRepository.findByStatusOrderByCreatedAtDesc(status);
+        }
 
         return posts.stream().map(this::toResponse).toList();
     }
-
-    // --- private helpers ---
 
     private void assertOwnership(Post post, String userEmail) {
         User user = userRepository.findByEmail(userEmail)
@@ -89,7 +97,24 @@ public class PostService {
         }
     }
 
+    public List<PostResponse> getPostsByUser(UUID userId, String sortBy) {
+        List<Post> posts;
+
+        if ("most_liked".equals(sortBy)) {
+            posts = postRepository.findByUserIdOrderByLikeCountDesc(userId);
+        } else if ("most_commented".equals(sortBy)) {
+            posts = postRepository.findByUserIdOrderByCommentCountDesc(userId);
+        } else {
+            posts = postRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        }
+
+        return posts.stream().map(this::toResponse).toList();
+    }
+
     private PostResponse toResponse(Post post) {
+        long likeCount = likeRepository.countByPostSlug(post.getSlug());
+        long commentCount = commentRepository.countByPostSlug(post.getSlug());
+
         return new PostResponse(
                 post.getSlug(),
                 post.getTitle(),
@@ -98,7 +123,9 @@ public class PostService {
                 post.getStatus(),
                 post.getUser().getId(),
                 post.getCreatedAt(),
-                post.getUpdatedAt()
+                post.getUpdatedAt(),
+                likeCount,
+                commentCount
         );
     }
 }
