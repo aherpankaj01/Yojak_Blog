@@ -18,7 +18,7 @@ import java.util.UUID;
 public class Post {
 
     @Id
-    private String slug; // slug is the primary key, matching your Appwrite pattern
+    private String slug;
 
     @Column(nullable = false)
     private String title;
@@ -30,7 +30,7 @@ public class Post {
     private String featuredImage;
 
     @Column(nullable = false)
-    private String status; // "active" / "inactive"
+    private String status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

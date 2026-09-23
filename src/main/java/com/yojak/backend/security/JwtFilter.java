@@ -52,8 +52,6 @@ public class JwtFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            // Invalid, expired, or stale token (e.g. user no longer exists) —
-            // treat as unauthenticated rather than failing the request.
             SecurityContextHolder.clearContext();
         }
 

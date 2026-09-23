@@ -36,7 +36,7 @@ public class User {
     @Column(columnDefinition = "TEXT")
     private String bio;
 
-    private String avatar; // stores the Cloudinary fileId, same pattern as post.featuredImage
+    private String avatar;
 
     @PrePersist
     protected void onCreate() {

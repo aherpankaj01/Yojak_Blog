@@ -31,7 +31,6 @@ public class LikeService {
             like.setUser(user);
             likeRepository.save(like);
         }
-        // if already liked, silently no-op — makes the endpoint safe to call twice
 
         return getLikeStatus(postSlug, userEmail);
     }
