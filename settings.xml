@@ -1,0 +1,13 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/1.2.0/settings.xsd">
+
+    <mirrors>
+        <mirror>
+            <id>wso2-central-mirror</id>
+            <mirrorOf>central</mirrorOf>
+            <url>https://maven.wso2.org/nexus/content/repositories/central/</url>
+        </mirror>
+    </mirrors>
+
+</settings>
