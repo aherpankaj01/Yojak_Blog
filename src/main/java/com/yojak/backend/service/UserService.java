@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+import com.yojak.backend.dto.UserSummaryResponse;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +41,27 @@ public class UserService {
         User saved = userRepository.save(user);
         return toResponse(saved);
     }
+
+    public List<UserSummaryResponse> searchUsers(String query) {
+        List<User> found = new ArrayList<>();
+
+        if (query.length() == 36) {
+            try {
+                userRepository.findById(UUID.fromString(query)).ifPresent(found::add);
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+
+        for (User u : userRepository.findTop10ByNameContainingIgnoreCase(query)) {
+            boolean already = found.stream().anyMatch(f -> f.getId().equals(u.getId()));
+            if (!already) found.add(u);
+        }
+
+        return found.stream()
+                .map(u -> new UserSummaryResponse(u.getId(), u.getName(), u.getBio(), u.getAvatar()))
+                .toList();
+    }
+
 
     private UserProfileResponse toResponse(User user) {
         return new UserProfileResponse(

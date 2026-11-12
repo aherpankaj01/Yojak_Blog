@@ -36,4 +36,6 @@ public interface PostRepository extends JpaRepository<Post, String> {
 
     @Query("SELECT p FROM Post p LEFT JOIN Comment c ON c.post = p WHERE p.user.id = :userId GROUP BY p ORDER BY COUNT(c) DESC, p.createdAt DESC")
     List<Post> findByUserIdOrderByCommentCountDesc(@Param("userId") UUID userId);
+
+    List<Post> findTop20ByStatusAndTitleContainingIgnoreCaseOrderByCreatedAtDesc(String status, String title);
 }

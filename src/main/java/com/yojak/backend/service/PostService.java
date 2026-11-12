@@ -111,6 +111,15 @@ public class PostService {
         return posts.stream().map(this::toResponse).toList();
     }
 
+    public List<PostResponse> searchPosts(String query) {
+        return postRepository
+                .findTop20ByStatusAndTitleContainingIgnoreCaseOrderByCreatedAtDesc("active", query)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+
     private PostResponse toResponse(Post post) {
         long likeCount = likeRepository.countByPostSlug(post.getSlug());
         long commentCount = commentRepository.countByPostSlug(post.getSlug());
@@ -127,5 +136,7 @@ public class PostService {
                 likeCount,
                 commentCount
         );
+
+
     }
 }
