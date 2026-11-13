@@ -92,6 +92,11 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong on our side. Please try again.");
     }
 
+    @ExceptionHandler(EmailSendException.class)
+    public ResponseEntity<Map<String, Object>> handleEmailSend(EmailSendException ex) {
+        return build(HttpStatus.BAD_GATEWAY, ex.getMessage());
+    }
+
     private ResponseEntity<Map<String, Object>> build(HttpStatus status, String message) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
