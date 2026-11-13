@@ -1,3 +1,4 @@
+
 package com.yojak.backend.dto;
 
 import lombok.AllArgsConstructor;
@@ -17,9 +18,14 @@ public class PostResponse {
     private String content;
     private String featuredImage;
     private String status;
+
     private UUID userId;
+    private String authorName;
+    private String authorAvatar;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
     private long likeCount;
     private long commentCount;
 }

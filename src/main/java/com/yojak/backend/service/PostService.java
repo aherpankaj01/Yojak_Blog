@@ -120,9 +120,13 @@ public class PostService {
     }
 
 
+
     public PostResponse toResponse(Post post) {
+
         long likeCount = likeRepository.countByPostSlug(post.getSlug());
         long commentCount = commentRepository.countByPostSlug(post.getSlug());
+
+        User author = post.getUser();
 
         return new PostResponse(
                 post.getSlug(),
@@ -130,13 +134,19 @@ public class PostService {
                 post.getContent(),
                 post.getFeaturedImage(),
                 post.getStatus(),
-                post.getUser().getId(),
+
+                author.getId(),
+                author.getName(),
+                author.getAvatar(),
+
                 post.getCreatedAt(),
                 post.getUpdatedAt(),
+
                 likeCount,
                 commentCount
         );
-
-
     }
+
+
+
 }
