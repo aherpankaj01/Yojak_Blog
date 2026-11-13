@@ -120,7 +120,7 @@ public class PostService {
     }
 
 
-    private PostResponse toResponse(Post post) {
+    public PostResponse toResponse(Post post) {
         long likeCount = likeRepository.countByPostSlug(post.getSlug());
         long commentCount = commentRepository.countByPostSlug(post.getSlug());
 
