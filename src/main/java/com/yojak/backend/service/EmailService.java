@@ -29,7 +29,7 @@ public class EmailService {
     private final RestClient restClient = RestClient.create();
 
     public void sendOtp(String toEmail, String otp, long expiryMinutes) {
-        if (apiKey == null || apiKey.isBlank()) {
+        if (isDevMode()) {
             log.warn("BREVO_API_KEY not set. DEV MODE: OTP for {} is {}", toEmail, otp);
             return;
         }
@@ -41,10 +41,35 @@ public class EmailService {
                 + "<p>This code expires in " + expiryMinutes + " minutes. "
                 + "If you didn't try to sign up, you can ignore this email.</p></div>";
 
+        send(toEmail, "Your Yojak verification code", html);
+    }
+
+    public void sendPasswordReset(String toEmail, String link, long expiryMinutes) {
+        if (isDevMode()) {
+            log.warn("BREVO_API_KEY not set. DEV MODE: password reset link for {} is {}", toEmail, link);
+            return;
+        }
+
+        String html = "<div style=\"font-family:Arial,sans-serif\">"
+                + "<h2>Reset your password</h2>"
+                + "<p>We received a request to reset your Yojak password. Click the button below to choose a new one.</p>"
+                + "<p><a href=\"" + link + "\" style=\"display:inline-block;padding:12px 20px;"
+                + "background:#6366f1;color:#ffffff;text-decoration:none;border-radius:6px\">Reset password</a></p>"
+                + "<p>This link expires in " + expiryMinutes + " minutes and can be used once. "
+                + "If you didn't request this, you can safely ignore this email. Your password won't change.</p></div>";
+
+        send(toEmail, "Reset your Yojak password", html);
+    }
+
+    private boolean isDevMode() {
+        return apiKey == null || apiKey.isBlank();
+    }
+
+    private void send(String toEmail, String subject, String html) {
         Map<String, Object> body = Map.of(
                 "sender", Map.of("name", senderName, "email", senderEmail),
                 "to", List.of(Map.of("email", toEmail)),
-                "subject", "Your Yojak verification code",
+                "subject", subject,
                 "htmlContent", html
         );
 
@@ -57,8 +82,8 @@ public class EmailService {
                     .retrieve()
                     .toBodilessEntity();
         } catch (RestClientException e) {
-            log.error("Failed to send OTP email", e);
-            throw new EmailSendException("We couldn't send the verification email. Please try again.");
+            log.error("Failed to send email", e);
+            throw new EmailSendException("We couldn't send the email. Please try again.");
         }
     }
 }
