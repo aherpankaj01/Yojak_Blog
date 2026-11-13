@@ -17,6 +17,7 @@ public class LikeService {
     private final LikeRepository likeRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public LikeResponse likePost(String postSlug, String userEmail) {
         Post post = postRepository.findBySlug(postSlug)
@@ -30,6 +31,8 @@ public class LikeService {
             like.setPost(post);
             like.setUser(user);
             likeRepository.save(like);
+
+            notificationService.notifyLike(post, user);
         }
 
         return getLikeStatus(postSlug, userEmail);
@@ -40,7 +43,10 @@ public class LikeService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         likeRepository.findByPostSlugAndUserId(postSlug, user.getId())
-                .ifPresent(likeRepository::delete);
+                .ifPresent(like -> {
+                    likeRepository.delete(like);
+                    notificationService.removeLike(postSlug, user);
+                });
 
         return getLikeStatus(postSlug, userEmail);
     }

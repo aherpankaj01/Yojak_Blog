@@ -21,6 +21,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public CommentResponse addComment(String postSlug, CommentRequest request, String userEmail) {
         Post post = postRepository.findBySlug(postSlug)
@@ -29,12 +30,34 @@ public class CommentService {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
+        Comment parent = null;
+        if (request.getParentId() != null) {
+            parent = commentRepository.findById(request.getParentId())
+                    .orElseThrow(() -> new IllegalArgumentException("Parent comment not found"));
+
+            if (!parent.getPost().getSlug().equals(postSlug)) {
+                throw new IllegalArgumentException("Parent comment does not belong to this post");
+            }
+        }
+
         Comment comment = new Comment();
         comment.setContent(request.getContent());
         comment.setPost(post);
         comment.setUser(user);
+        comment.setParent(parent);
 
         Comment saved = commentRepository.save(comment);
+
+        if (parent != null) {
+            notificationService.notifyReply(parent, user, saved);
+        }
+
+        boolean ownerAlreadyNotified = parent != null
+                && parent.getUser().getId().equals(post.getUser().getId());
+        if (!ownerAlreadyNotified) {
+            notificationService.notifyComment(post, user, saved);
+        }
+
         return toResponse(saved);
     }
 
@@ -65,7 +88,8 @@ public class CommentService {
                 comment.getContent(),
                 comment.getUser().getId(),
                 comment.getUser().getName(),
-                comment.getCreatedAt()
+                comment.getCreatedAt(),
+                comment.getParent() != null ? comment.getParent().getId() : null
         );
     }
 }

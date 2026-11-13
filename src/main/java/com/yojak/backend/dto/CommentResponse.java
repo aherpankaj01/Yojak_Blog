@@ -17,4 +17,5 @@ public class CommentResponse {
     private UUID userId;
     private String userName;
     private LocalDateTime createdAt;
+    private UUID parentId;
 }
